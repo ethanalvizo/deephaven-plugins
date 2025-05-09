@@ -159,3 +159,12 @@ class NewFigureType(BidirectionalObjectType):
         client_connection = FigureMessageStream(obj, connection)
         client_connection.start()
         return client_connection
+
+    def send_update(self, figure: Figure):
+        stream = self._streams.get(figure)
+        if stream is not None:
+            data = _export_figure(figure)
+            stream.on_data(data)
+
+    # def create_client_connection(self, obj: object, connection: MessageStream) -> MessageStream:
+    #    return super().create_client_connection(obj, connection)
