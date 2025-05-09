@@ -79,15 +79,16 @@ export function MatplotlibView(
       async function fetchData() {
         log.debug('fetchData');
         const widget = await fetch();
-        const imageData = widget.getDataAsBase64();
-        setImageSrc(`data:image/png;base64,${imageData}`);
-        if (revision <= 0) {
-          log.debug('Getting new input table');
-          // We haven't connected to the input table yet, do that
-          const newInputTable =
-            (await widget.exportedObjects[0].fetch()) as dh.Table;
-          setInputTable(newInputTable);
-        }
+        const data = widget.getDataAsBase64();
+        console.log('Data', data);
+        const newImageData = widget.getDataAsBase64();
+        setImageSrc(`data:image/png;base64,${newImageData}`);
+        widget.addEventListener('message', event => {
+          log.debug('Message event', event);
+          console.log('Message event', event);
+          const newImageData = event.detail.getDataAsBase64();
+          setImageSrc(`data:image/png;base64,${newImageData}`);
+        });
       }
       fetchData();
     },
