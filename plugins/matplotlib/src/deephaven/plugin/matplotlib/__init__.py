@@ -137,6 +137,7 @@ class TableAnimation(Animation):
 
     def _draw_frame(self, framedata):
         data = {}
+        print(f"Drawing frame with data: {framedata}")
         for column in self._columns:
             data[column] = dhnp.to_numpy(self._table, [column])[:, 0]
         self._func(data, self._last_update, *self._args)

@@ -1,12 +1,19 @@
 from io import BytesIO
 from weakref import WeakKeyDictionary, WeakSet
 from matplotlib.figure import Figure
-from deephaven.plugin.object_type import Exporter, FetchOnlyObjectType
+from deephaven.plugin.object_type import (
+    Exporter,
+    FetchOnlyObjectType,
+    BidirectionalObjectType,
+    MessageStream,
+)
 from deephaven.execution_context import get_exec_ctx
 from threading import Timer
 from deephaven.liveness_scope import liveness_scope
 from deephaven import input_table, new_table
 from deephaven.column import string_col, int_col
+
+from .FigureMessageStream import FigureMessageStream
 
 # Name of the matplotlib figure object that was export
 NAME = "matplotlib.figure.Figure"
@@ -124,3 +131,38 @@ class FigureType(FetchOnlyObjectType):
             exporter.reference(input_t)
             scope.preserve(input_t)
         return _export_figure(figure)
+
+
+class NewFigureType(BidirectionalObjectType):
+    def __init__(self):
+        self._streams = WeakKeyDictionary()
+
+    @property
+    def name(self) -> str:
+        return NAME
+
+    def is_type(self, object) -> bool:
+        return isinstance(object, Figure)
+
+    def to_bytes(self, exporter: Exporter, figure: Figure) -> bytes:
+        with liveness_scope() as scope, get_exec_ctx():
+            input_t = _get_input_table(figure)
+            exporter.reference(input_t)
+            scope.preserve(input_t)
+        return _export_figure(figure)
+
+    def create_client_connection(
+        self, obj: object, connection: MessageStream
+    ) -> MessageStream:
+        if not isinstance(obj, Figure):
+            raise TypeError(f"Expected Figure, got {type(obj)}")
+        client_connection = FigureMessageStream(obj, connection)
+        client_connection.start()
+        return client_connection
+
+    def send_update(self, figure: Figure):
+        print("Sending update to figure")
+        stream = self._streams.get(figure)
+        if stream is not None:
+            data = _export_figure(figure)
+            stream.on_data(data)

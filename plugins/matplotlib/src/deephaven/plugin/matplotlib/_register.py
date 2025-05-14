@@ -26,7 +26,7 @@ class MatplotlibRegistration(Registration):
 
         callback = DheSafeCallbackWrapper(callback)
 
-        callback.register(figure_type.FigureType)
+        callback.register(figure_type.NewFigureType)
 
         js_plugin = create_js_plugin(PACKAGE_NAMESPACE, JS_NAME)
 
