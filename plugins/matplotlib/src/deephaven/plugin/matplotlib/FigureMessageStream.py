@@ -45,7 +45,7 @@ class FigureMessageStream(MessageStream):
         self._figure.savefig(
             buf, format="PNG", dpi=DPI
         )  # Save the figure to the buffer
-        self._connection.on_data(buf.getvalue(), [self._figure])
+        self._connection.on_data(buf.getvalue(), [])
         print("Figure saved to buffer and sent to client")
 
         self._is_exporting = False
@@ -62,7 +62,7 @@ class FigureMessageStream(MessageStream):
         buf = BytesIO()
         print("Saving initial figure to buffer")
         self._figure.savefig(buf, format="PNG", dpi=DPI)
-        self._connection.on_data(buf.getvalue(), [self._figure])
+        self._connection.on_data(buf.getvalue(), [])
         print("Initial figure sent to client")
 
         self._figure.stale_callback = self._handle_figure_update
