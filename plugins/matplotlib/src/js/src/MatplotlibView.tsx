@@ -3,8 +3,6 @@ import type { dh } from '@deephaven/jsapi-types';
 import Log from '@deephaven/log';
 import { WidgetComponentProps } from '@deephaven/plugin';
 
-const log = Log.module('@deephaven/js-plugin-matplotlib.MatplotlibView');
-
 export const MatplotlibViewStyle: CSSProperties = {
   height: '100%',
   width: '100%',
@@ -29,13 +27,11 @@ export function MatplotlibView(
   useEffect(
     function updateData() {
       async function fetchData() {
-        log.debug('fetchData');
         const widget = await fetch();
         const imageData = widget.getDataAsBase64();
         console.log('Data', imageData);
         setImageSrc(`data:image/png;base64,${imageData}`);
         widget.addEventListener('message', event => {
-          log.debug('Message event', event);
           console.log('Message event', event);
           const newImageData = event.detail.getDataAsBase64();
           setImageSrc(`data:image/png;base64,${newImageData}`);

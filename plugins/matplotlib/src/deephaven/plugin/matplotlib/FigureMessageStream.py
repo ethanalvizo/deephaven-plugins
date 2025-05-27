@@ -70,7 +70,6 @@ class FigureMessageStream(MessageStream):
     def on_close(self) -> None:
         assert not self._is_closed
 
-        logger.debug("FigureMessageStream closed")
         print("FigureMessageStream closed")
         self._connection.on_close()
         self._is_closed = True
